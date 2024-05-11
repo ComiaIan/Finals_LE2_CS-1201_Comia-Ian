@@ -41,41 +41,48 @@ class DiceGame(Score):
             return print("\tAn error occurred while trying to save the score.")
 
     def play_game(self, username):
-        user_score = 0
-        cpu_score = 0
+        stage = 1
+        total_score = 0
+        game = True
 
-        for i in range (3):
-            user_num = random.randint(1,6)
-            cpu_num = random.randint(1,6)
+        while game:
+            user_score = 0
+            cpu_score = 0
 
-            if user_num > cpu_num:
-                print(f"\tUser: {user_num}\n\tCPU: {cpu_num}\n\n\tUser Won!\n")
-                user_score += 1
-            elif user_num < cpu_num:
-                print(f"\tUser: {user_num}\n\tCPU: {cpu_num}\n\n\tCPU Won!\n")
-                cpu_score += 1
+            while user_score < 2 and cpu_score < 2:
+                user_num = random.randint(1,6)
+                cpu_num = random.randint(1,6)
+
+                if user_num > cpu_num:
+                    print(f"\t{username} rolled: {user_num}\n\tCPU: {cpu_num}\n\n\t{username} Won!\n")
+                    user_score += 1
+                elif user_num < cpu_num:
+                    print(f"\t{username} rolled: {user_num}\n\tCPU: {cpu_num}\n\n\tCPU Won!\n")
+                    cpu_score += 1
+                else:
+                    print(f"\t{username} rolled: {user_num}\n\tCPU: {cpu_num}\n\n\tDRAW!\n")
+                    continue
+
+            if user_score > cpu_score:
+                total_score += 3 + user_score                
+                print(f"\tCongratulations! You won stage {stage}!\n\t{username}'s current score: {total_score}")
+                stage += 1
+                continue_game = str(input("\tContinue to the next stage? (y/n): "))
+
+                if continue_game.lower() == "n":
+                    print("\tThanks for playing!")
+                    game = False
+                elif continue_game.lower() != "y":
+                    print("\tInvalid input. Please enter 'y' or 'n'.")                    
             else:
-                print(f"\tUser: {user_num}\n\tCPU: {cpu_num}\n\n\tDRAW!\n")
-
-        if user_score > cpu_score:
-            user_score += 3
+                total_score += user_score
+                print("\tGame over.\n")  
+                game = False
+        return total_score                            
         
-        save_user_score = int(user_score)
-
-        self.save_scores(username, save_user_score)
-
-        print(f"\tGame Over! {username}'s score: {user_score}, CPU's score: {cpu_score}")
-
-        while True:
-            continue_game = input("\tContinue? (y/n): ")
-
-            if continue_game.lower() == 'y':
-                self.play_game(username)
-            elif continue_game.lower() == 'n':
-                print("\tThanks for playing!")
-                self.menu(username)
-            else:
-                print("\tInvalid input. Please enter 'y' or 'n'.")
+    def start_game(self, username):
+        total_score = self.play_game(username)
+        self.save_scores(username, total_score)
 
     def show_top_scores(self):
         scores = self.load_scores()
